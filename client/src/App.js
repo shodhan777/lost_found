@@ -1,0 +1,30 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+import Login from './components/Login';
+import SignUp from './components/SignUp';
+import Dashboard from './components/Dashboard';
+import FoundForm from './components/FoundForm';
+import LostForm from './components/LostForm';
+import ClaimedDashboard from './components/claimedDashboard';
+import MatchedResults from './components/MatchResults';
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} /> {/* default route */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/found" element={<FoundForm />} />
+        <Route path="/lost" element={<LostForm />} />
+        <Route path="/claimed" element={<ClaimedDashboard />} />
+        <Route path="/matches" element={<MatchedResults />} />
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
+
