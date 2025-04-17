@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './Form.css';
+import './LostForm.css';
 
 function LostForm() {
   const [formData, setFormData] = useState({
@@ -33,6 +33,7 @@ function LostForm() {
     <div className="form-container">
       <h2>Lost Item Form</h2>
       <form onSubmit={handleSubmit}>
+        <label htmlFor="title">Title</label>
         <input
           name="title"
           placeholder="Item Title"
@@ -40,12 +41,16 @@ function LostForm() {
           onChange={handleChange}
           required
         />
+
+        <label htmlFor="description">Description</label>
         <textarea
           name="description"
           placeholder="Description"
           value={formData.description}
           onChange={handleChange}
         />
+
+        <label htmlFor="location">Location</label>
         <input
           name="location"
           placeholder="Lost Location"
@@ -53,6 +58,8 @@ function LostForm() {
           onChange={handleChange}
           required
         />
+
+        <label htmlFor="date_lost">Date Lost</label>
         <input
           type="date"
           name="date_lost"
@@ -60,12 +67,15 @@ function LostForm() {
           onChange={handleChange}
           required
         />
+
+        <label htmlFor="image_url">Image URL</label>
         <input
           name="image_url"
           placeholder="Image URL"
           value={formData.image_url}
           onChange={handleChange}
         />
+
         <button type="submit">Submit</button>
       </form>
 

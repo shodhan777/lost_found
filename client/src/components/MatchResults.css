@@ -1,0 +1,41 @@
+/* MatchResult Component Styles */
+.match-card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
+  }
+  
+  .match-card h3 {
+    font-size: 1.5rem;
+    color: #007BFF;
+    margin-bottom: 10px;
+  }
+  
+  .match-card p {
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
+  
+  .contact-button {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 15px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+  }
+  
+  .contact-button:hover {
+    background-color: #218838;
+  }
+  
+  .match-results {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  

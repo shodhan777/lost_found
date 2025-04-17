@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './Form.css';
+import './FoundForm.css';
 
 const FoundForm = () => {
   const [title, setTitle] = useState('');
@@ -45,10 +45,21 @@ const FoundForm = () => {
     <div className="form-container">
       <h2>Report Found Item</h2>
       <form onSubmit={handleSubmit}>
+      <label htmlFor="Title">Title</label>
         <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+        <label htmlFor="Description">Description</label>
         <textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+        <label htmlFor="location">Location</label>
         <input type="text" placeholder="Location" value={location} onChange={(e) => setLocation(e.target.value)} required />
-        <input type="date" value={dateFound} onChange={(e) => setDateFound(e.target.value)} required />
+        <label htmlFor="date">Found Date</label>
+        <input
+           type="date"
+            id="date"
+            value={dateFound}
+          onChange={(e) => setDateFound(e.target.value)}
+          required
+          />
+        <label htmlFor="Image">Image</label>
         <input type="text" placeholder="Image URL" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
         <button type="submit">Submit</button>
       </form>
