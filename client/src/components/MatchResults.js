@@ -75,7 +75,7 @@ function MatchedResults() {
                 />
               )}
 
-              <p><strong>Status:</strong> {match.status}</p>
+             
               <p><strong>Status:</strong> {match.claim_status}</p>
               <p><strong>Matched On:</strong> {new Date(match.matched_on).toLocaleString()}</p>
 

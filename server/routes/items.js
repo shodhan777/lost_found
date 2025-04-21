@@ -99,7 +99,7 @@ router.get('/matches', async (req, res) => {
       JOIN lost_items ON lost_items.id = matches.lost_item_id
       JOIN found_items ON found_items.id = matches.found_item_id
       JOIN users ON users.id = found_items.user_id
-      WHERE matches.status = 'matched'
+      WHERE matches.status = 'matched' AND matches.claim_status = 'unclaimed'
     `);
 
     res.json(rows); // Sending back the matches data
