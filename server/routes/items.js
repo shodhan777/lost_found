@@ -90,6 +90,7 @@ router.get('/matches', async (req, res) => {
         found_items.description AS found_description,
         found_items.location AS found_location,
         matches.status,
+        matches.claim_status,
         matches.matched_on,
         users.email AS user_email,
         lost_items.image_url AS lost_image_url,

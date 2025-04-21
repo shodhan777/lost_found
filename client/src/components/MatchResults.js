@@ -18,6 +18,24 @@ function MatchedResults() {
     fetchMatches();
   }, []);
 
+  const handleClaim = async (matchId) => {
+    try {
+      const response = await axios.patch(`http://localhost:5000/api/items/match/${matchId}/claim`);
+      if (response.status === 200) {
+        alert('Claim successful');
+        // Update status in UI
+        setMatches(prevMatches =>
+          prevMatches.map(match =>
+            match.match_id === matchId ? { ...match, status: 'claimed' } : match
+          )
+        );
+      }
+    } catch (err) {
+      console.error('Error claiming the match:', err);
+    }
+  };
+  
+
   return (
     <div className="matched-results">
       <h2>Matched Lost and Found Items</h2>
@@ -46,6 +64,7 @@ function MatchedResults() {
               )}
 
               <p><strong>Status:</strong> {match.status}</p>
+              <p><strong>Status:</strong> {match.claim_status}</p>
               <p><strong>Matched On:</strong> {new Date(match.matched_on).toLocaleString()}</p>
 
               {/* ✅ Display contact email */}
@@ -53,6 +72,12 @@ function MatchedResults() {
                 <p><strong>Contact Email:</strong> <a href={`mailto:${match.user_email}`}>{match.user_email}</a></p>
               )}
 
+              {/* Claim Button */}
+              {match.status !== 'claimed' && (
+                <button onClick={() => handleClaim(match.match_id)} style={{ padding: '10px 15px', backgroundColor: '#4CAF50', color: 'white', border: 'none', cursor: 'pointer' }}>
+                  Claim Item
+                </button>
+              )}
               <hr />
             </div>
           ))
