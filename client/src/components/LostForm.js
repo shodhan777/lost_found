@@ -11,39 +11,49 @@ function LostForm() {
   });
 
   const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');  // Preview for the image
   const [message, setMessage] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUpload = async () => {
-    if (!imageFile) return '';
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setImageFile(file);
 
-    const formData = new FormData();
-    formData.append('image', imageFile);
-
-    try {
-      const res = await axios.post('http://localhost:5000/api/items/upload', formData);
-      return res.data.imageUrl;
-    } catch (err) {
-      console.error('Image upload failed:', err);
-      return '';
+    // Create a preview of the image for the user
+    if (file) {
+      setImagePreview(URL.createObjectURL(file));
+    } else {
+      setImagePreview('');
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const uploadedImageUrl = await handleImageUpload();
+      const lostItemData = new FormData();
 
-      const lostItem = {
-        ...formData,
-        image_url: uploadedImageUrl,
-      };
+      // Append form data
+      Object.keys(formData).forEach((key) => {
+        lostItemData.append(key, formData[key]);
+      });
 
-      const res = await axios.post('http://localhost:5000/api/items/lost', lostItem);
+      // Append image file if present
+      if (imageFile) {
+        lostItemData.append('image', imageFile);
+      }
+
+      // Submit the form with image data
+      const res = await axios.post('http://localhost:5000/api/items/lost', lostItemData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
       setMessage(res.data.message || 'Lost item submitted successfully');
     } catch (err) {
       console.error('Error submitting lost item:', err);
@@ -94,8 +104,13 @@ function LostForm() {
         <input
           type="file"
           accept="image/*"
-          onChange={(e) => setImageFile(e.target.files[0])}
+          onChange={handleFileChange}
         />
+        {imagePreview && (
+          <div className="image-preview-container">
+            <img src={imagePreview} alt="Preview" className="image-preview" />
+          </div>
+        )}
 
         <button type="submit">Submit</button>
       </form>

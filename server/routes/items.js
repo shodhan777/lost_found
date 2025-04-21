@@ -37,8 +37,9 @@ module.exports = (pool) => {
       // Match with lost items based on title or location
       const [matchedLostItems] = await pool.query(
         `SELECT * FROM lost_items
-         WHERE title LIKE ? OR location LIKE ?`,
-        [`%${title}%`, `%${location}%`]
+   WHERE title LIKE ?`,
+  [`%${title}%`],
+        [`%${title}%`]
       );
 
       const matches = [];
