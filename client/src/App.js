@@ -20,7 +20,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/found" element={<FoundForm />} />
         <Route path="/lost" element={<LostForm />} />
-        <Route path="/claim" element={<ClaimItemPage/>} />
+        <Route path="/claimed" element={<ClaimItemPage/>} />
         <Route path="/matches" element={<MatchedResults />} />
         <Route path="/claim/:id" element={<ClaimItem />} /> 
       </Routes>
