@@ -48,9 +48,9 @@ function MatchedResults() {
               <p><strong>Title:</strong> {match.lost_title}</p>
               <p><strong>Description:</strong> {match.lost_description}</p>
               <p><strong>Location:</strong> {match.lost_location}</p>
-              {match.lost_image && (
+              {match.lost_image_url && (
                 <img
-                  src={`http://localhost:5000/uploads/${match.lost_image}`}
+                  src={`http://localhost:5000/uploads/${match.lost_image_url}`}
                   alt="Lost item"
                   className="match-item-image"
                 />
@@ -60,9 +60,9 @@ function MatchedResults() {
               <p><strong>Title:</strong> {match.found_title}</p>
               <p><strong>Description:</strong> {match.found_description}</p>
               <p><strong>Location:</strong> {match.found_location}</p>
-              {match.found_image && (
+              {match.found_image_url && (
                 <img
-                  src={`http://localhost:5000/uploads/${match.found_image}`}
+                  src={`http://localhost:5000/uploads/${match.found_image_url}`}
                   alt="Found item"
                   className="match-item-image"
                 />
