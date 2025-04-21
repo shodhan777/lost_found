@@ -6,7 +6,6 @@ import SignUp from './components/SignUp';
 import Dashboard from './components/Dashboard';
 import FoundForm from './components/FoundForm';
 import LostForm from './components/LostForm';
-import ClaimItemPage from './components/ClaimItemPage';
 import MatchedResults from './components/MatchResults';
 import ClaimItem from './components/ClaimItem';
 
@@ -20,7 +19,6 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/found" element={<FoundForm />} />
         <Route path="/lost" element={<LostForm />} />
-        <Route path="/claimed" element={<ClaimItemPage/>} />
         <Route path="/matches" element={<MatchedResults />} />
         <Route path="/claim/:id" element={<ClaimItem />} /> 
       </Routes>
