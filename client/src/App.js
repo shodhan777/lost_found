@@ -8,6 +8,7 @@ import FoundForm from './components/FoundForm';
 import LostForm from './components/LostForm';
 import ClaimItemPage from './components/ClaimItemPage';
 import MatchedResults from './components/MatchResults';
+import ClaimItem from './components/ClaimItem';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/lost" element={<LostForm />} />
         <Route path="/claim" element={<ClaimItemPage/>} />
         <Route path="/matches" element={<MatchedResults />} />
+        <Route path="/claim/:id" element={<ClaimItem />} /> 
       </Routes>
     </Router>
   );
