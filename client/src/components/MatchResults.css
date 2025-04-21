@@ -1,71 +1,66 @@
 /* MatchResult Component Styles */
-.match-card {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    margin-bottom: 15px;
-  }
-  
-  .match-card h3 {
-    font-size: 1.5rem;
-    color: #007BFF;
-    margin-bottom: 10px;
-  }
-  
-  .match-card p {
-    font-size: 1rem;
-    margin-bottom: 10px;
-  }
-  
-  .contact-button {
-    background-color: #28a745;
-    color: white;
-    padding: 10px 15px;
-    font-size: 1rem;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-  }
-  
-  .contact-button:hover {
-    background-color: #218838;
-  }
-  
-  .match-results {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .matched-results {
-  max-height: 500px; /* Set a maximum height for the scrollable area */
-  overflow-y: auto;  /* Enable vertical scrolling */
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+
+.match-results {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
 }
 
+.matched-results {
+  width: 90vw;              /* 90% of the viewport width */
+  height: 80vh;             /* 80% of the viewport height */
+  overflow-y: auto;         /* Vertical scrolling */
+  padding: 20px;
+  margin: 20px auto;        /* Center the container */
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+
 .match-card {
+  width: 100%;
   margin-bottom: 20px;
   border: 1px solid #ccc;
   padding: 15px;
-  border-radius: 5px;
+  border-radius: 10px;
   background-color: #f9f9f9;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+}
+
+.match-card h3 {
+  font-size: 1.5rem;
+  color: #007BFF;
+  margin-bottom: 10px;
+}
+
+.match-card p {
+  font-size: 1rem;
+  margin-bottom: 10px;
+  color: #333;
 }
 
 .match-card img {
   max-width: 100%;
   height: auto;
+  border-radius: 8px;
   margin-bottom: 15px;
 }
-.matched-results {
-  max-height: 500px; /* Set a maximum height for the scrollable area */
-  overflow-y: auto;  /* Enable vertical scrolling */
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+
+.contact-button {
+  background-color: #28a745;
+  color: white;
+  padding: 10px 15px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.3s ease;
 }
 
-
+.contact-button:hover {
+  background-color: #218838;
+}

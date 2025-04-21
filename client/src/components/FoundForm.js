@@ -94,7 +94,7 @@ const FoundForm = () => {
               <img src={firstMatch.found_image_url} alt="Found item" style={{ maxWidth: '100%', height: 'auto', marginBottom: '15px' }} />
             )}
 
-            <p><strong>Status:</strong> {firstMatch.status}</p>
+          
             
           </div>
           <button onClick={handleNavigateToMatches} className="navigate-button">Go to Matches</button>

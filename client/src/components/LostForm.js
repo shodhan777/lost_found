@@ -1,3 +1,4 @@
+// src/components/LostForm.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import './LostForm.css';
@@ -30,7 +31,7 @@ function LostForm() {
   };
 
   return (
-    <div className="form-container">
+    <div className="lost-form-container">
       <h2>Lost Item Form</h2>
       <form onSubmit={handleSubmit}>
         <label htmlFor="title">Title</label>
@@ -85,3 +86,4 @@ function LostForm() {
 }
 
 export default LostForm;
+  
