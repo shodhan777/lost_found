@@ -39,3 +39,33 @@
     gap: 10px;
   }
   
+  .matched-results {
+  max-height: 500px; /* Set a maximum height for the scrollable area */
+  overflow-y: auto;  /* Enable vertical scrolling */
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.match-card {
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.match-card img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 15px;
+}
+.matched-results {
+  max-height: 500px; /* Set a maximum height for the scrollable area */
+  overflow-y: auto;  /* Enable vertical scrolling */
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+
