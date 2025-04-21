@@ -33,7 +33,7 @@ function Dashboard() {
         <button className="action-btn" onClick={() => navigate('/found')}>
           I have found something
         </button>
-        <button className="action-btn" onClick={() => navigate('/lost')}>
+        <button className="action-btn lost-btn" onClick={() => navigate('/lost')}>
           I have lost something
         </button>
       </div>

@@ -8,8 +8,7 @@ function ClaimItem() {
 
   const subject = encodeURIComponent("Claiming my lost item");
   const body = encodeURIComponent(`Hello,\n\nI believe this item belongs to me. Could you please help me with the next steps?\n\nThank you!`);
-
-  const mailtoLink = `mailto:${email}?subject=${subject}&body=${body}`;
+  const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`;
 
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
@@ -17,7 +16,7 @@ function ClaimItem() {
       {email ? (
         <>
           <p>Please contact the item reporter at: <strong>{email}</strong></p>
-          <a href={mailtoLink} style={{ textDecoration: 'none' }}>
+          <a href={gmailLink} target="_blank" rel="noopener noreferrer">
             <button style={{
               padding: '10px 20px',
               backgroundColor: '#D44638',
@@ -32,7 +31,7 @@ function ClaimItem() {
           </a>
         </>
       ) : (
-        <p>Email not available.</p>
+        <p>Email not available. Did you navigate properly using state?</p>
       )}
     </div>
   );
