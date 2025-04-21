@@ -9,12 +9,12 @@ const FoundForm = () => {
   const [location, setLocation] = useState('');
   const [dateFound, setDateFound] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [userId, setUserId] = useState(1); // Replace with dynamic user ID when auth added
+  const [userId, setUserId] = useState(1); 
   const [message, setMessage] = useState('');
-  const [matchesFound, setMatchesFound] = useState(false); // To track if matches are found
-  const [firstMatch, setFirstMatch] = useState(null); // To store the first match
+  const [matchesFound, setMatchesFound] = useState(false); 
+  const [firstMatch, setFirstMatch] = useState(null); 
 
-  const navigate = useNavigate(); // Initialize useNavigate for navigation
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,12 +29,12 @@ const FoundForm = () => {
 
     try {
       const res = await axios.post('http://localhost:5000/api/items/found', foundItem);
-      console.log("Backend Response:", res.data); // Log the response to check the matches
+      console.log("Backend Response:", res.data);
       setMessage(res.data.message);
 
       if (res.data.matches && res.data.matches.length > 0) {
         setMatchesFound(true);
-        setFirstMatch(res.data.matches[0]); // Set the first match (most recent)
+        setFirstMatch(res.data.matches[0]); 
       } else {
         setMatchesFound(false);
         setFirstMatch(null);
