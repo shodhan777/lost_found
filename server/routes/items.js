@@ -41,10 +41,11 @@ module.exports = (pool) => {
       for (let lostItem of matchedLostItems) {
         // Insert into match table
         const [matchInsert] = await pool.query(
-          `INSERT INTO matches (lost_item_id, found_item_id, status, matched_on)
-           VALUES (?, ?, 'matched', NOW())`,
-          [lostItem.id, foundItemId]
+          `INSERT INTO matches (lost_item_id, found_item_id, status, matched_on, lost_image, found_image)
+           VALUES (?, ?, 'matched', NOW(), ?, ?)`,
+          [lostItem.id, foundItemId, lostItem.image_url, image_url]
         );
+        
   
         matches.push({
           match_id: matchInsert.insertId,
@@ -52,13 +53,13 @@ module.exports = (pool) => {
           lost_title: lostItem.title,
           lost_description: lostItem.description,
           lost_location: lostItem.location,
-          lost_image_url: lostItem.image_url,
+          lost_image: lostItem.image_url,
   
           found_item_id: foundItemId,
           found_title: title,
-          found_description: description,
+          found_description: description  ,
           found_location: location,
-          found_image_url: image_url,
+          found_image: image_url,
         });
       }
   
