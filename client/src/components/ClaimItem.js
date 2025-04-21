@@ -31,7 +31,7 @@ function ClaimItem() {
           </a>
         </>
       ) : (
-        <p>Email not available. Did you navigate properly using state?</p>
+        <p>Email not available</p>
       )}
     </div>
   );

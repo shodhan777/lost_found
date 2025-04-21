@@ -3,7 +3,7 @@ const express = require('express');
 module.exports = (pool) => {
   const router = express.Router();
 
-  // Login Route
+ 
   router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
@@ -29,7 +29,7 @@ module.exports = (pool) => {
     }
   });
 
-  // Signup Route
+  
   router.post('/signup', async (req, res) => {
     const { username, email, password } = req.body;
 
@@ -59,7 +59,7 @@ module.exports = (pool) => {
     }
   });
 
-  // Optional: /register alias (for compatibility with some frontend)
+ 
   router.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
 

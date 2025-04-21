@@ -3,12 +3,12 @@ const express = require('express');
 module.exports = (pool) => {
   const router = express.Router();
 
-  // Route to report found item
+
   router.post('/found', async (req, res) => {
     const { title, description, location, date_found, image_url, user_id } = req.body;
   
     try {
-      // Insert found item into the database
+      
       const [result] = await pool.query(
         'INSERT INTO found_items (user_id, title, description, location, date_found, image_url) VALUES (?, ?, ?, ?, ?, ?)',
         [user_id, title, description, location, date_found, image_url]
@@ -16,16 +16,16 @@ module.exports = (pool) => {
   
       const foundItemId = result.insertId;
   
-      // Find matching lost items based on title or location (you can enhance this logic if needed)
+     
       const [matchedLostItems] = await pool.query(
         `SELECT * FROM lost_items
          WHERE title LIKE ? OR location LIKE ?`,
-        [`%${title}%`, `%${location}%`] // Use LIKE for partial matching
+        [`%${title}%`, `%${location}%`]
       );
   
       const matches = [];
   
-      // Loop through the matched lost items and insert into the matches table
+      
       for (let lostItem of matchedLostItems) {
         const [matchInsert] = await pool.query(
           `INSERT INTO matches (lost_item_id, found_item_id, status, matched_on)
@@ -33,22 +33,22 @@ module.exports = (pool) => {
           [lostItem.id, foundItemId]
         );
   
-        // Push each match result to the matches array along with image URLs
+       
         matches.push({
           match_id: matchInsert.insertId,
           lost_title: lostItem.title,
           lost_description: lostItem.description,
           lost_location: lostItem.location,
-          lost_image_url: lostItem.image_url,  // Lost item image URL
+          lost_image_url: lostItem.image_url,  
           found_item_id: foundItemId,
-          found_image_url: image_url,         // Found item image URL
+          found_image_url: image_url,         
         });
       }
   
-      // Send back the response with the matched items
+   
       res.status(201).json({
         message: 'Found item reported successfully',
-        matches: matches  // Return the matched items for the frontend
+        matches: matches  
       });
   
     } catch (err) {
@@ -58,7 +58,6 @@ module.exports = (pool) => {
   });
   
 
-  // Route to report lost item
   router.post('/lost', async (req, res) => {
     const { title, description, location, date_lost, image_url } = req.body;
 
@@ -75,9 +74,6 @@ module.exports = (pool) => {
     }
   });
 
-  // Route to fetch matched items
-  // Backend Route: /api/matches
-// Route to fetch matched items
 router.get('/matches', async (req, res) => {
   try {
     const [rows] = await pool.query(`
@@ -102,7 +98,7 @@ router.get('/matches', async (req, res) => {
       WHERE matches.status = 'matched' AND matches.claim_status = 'unclaimed'
     `);
 
-    res.json(rows); // Sending back the matches data
+    res.json(rows); 
   } catch (err) {
     console.error('Error fetching matches:', err);
     res.status(500).json({ error: 'Failed to fetch matches' });
@@ -111,7 +107,7 @@ router.get('/matches', async (req, res) => {
 
 
 
-  // Route to claim a matched item
+  
   router.patch('/match/:id/claim', async (req, res) => {
     const matchId = req.params.id;
 

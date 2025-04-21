@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 function MatchedResults() {
   const [matches, setMatches] = useState([]);
-  const navigate = useNavigate(); // ✅ Move it here
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     const fetchMatches = async () => {
