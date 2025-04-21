@@ -1,24 +1,15 @@
 /* MatchResult Component Styles */
-
-.match-results {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: center;
-}
-
 .matched-results {
-  width: 90vw;            
-  height: 80vh;             
-  overflow-y: auto;         
+  width: 90vw;  /* Adjust width to take up 90% of the viewport width */
+  height: 80vh; /* Adjust height to 80% of the viewport height */
+  overflow-y: auto; /* Allow vertical scrolling if content overflows */
   padding: 20px;
-  margin: 20px auto;     
+  margin: 20px auto;
   border: 1px solid #ccc;
   border-radius: 10px;
   background-color: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
 }
-
 
 .match-card {
   width: 100%;
@@ -27,26 +18,34 @@
   padding: 15px;
   border-radius: 10px;
   background-color: #f9f9f9;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08); /* Soft shadow for depth */
+  transition: transform 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.match-card:hover {
+  transform: translateY(-5px); /* Elevate the card slightly on hover */
 }
 
 .match-card h3 {
   font-size: 1.5rem;
   color: #007BFF;
   margin-bottom: 10px;
+  font-weight: 600;
 }
 
 .match-card p {
   font-size: 1rem;
   margin-bottom: 10px;
   color: #333;
+  line-height: 1.5; /* Improve readability */
 }
 
-.match-card img {
+.match-item-image {
   max-width: 100%;
   height: auto;
   border-radius: 8px;
   margin-bottom: 15px;
+  object-fit: cover; /* Ensure the image covers the area without distortion */
 }
 
 .contact-button {
@@ -58,9 +57,21 @@
   border-radius: 8px;
   cursor: pointer;
   text-align: center;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth background color and scale transition */
 }
 
 .contact-button:hover {
   background-color: #218838;
+  transform: scale(1.05); /* Slightly enlarge the button on hover */
 }
+
+.contact-button:active {
+  transform: scale(1); /* Return to normal size on click */
+}
+
+.match-card hr {
+  margin-top: 15px;
+  border-top: 1px solid #ddd;
+  margin-bottom: 15px;
+}
+

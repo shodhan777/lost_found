@@ -8,33 +8,53 @@ const FoundForm = () => {
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
   const [dateFound, setDateFound] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  const [userId, setUserId] = useState(1); 
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
+  const [fileName, setFileName] = useState('');
+  const [userId] = useState(1);
   const [message, setMessage] = useState('');
-  const [matchesFound, setMatchesFound] = useState(false); 
-  const [firstMatch, setFirstMatch] = useState(null); 
+  const [matchesFound, setMatchesFound] = useState(false);
+  const [firstMatch, setFirstMatch] = useState(null);
 
   const navigate = useNavigate();
 
+  // Handle image upload
+  const handleImageUpload = async () => {
+    if (!imageFile) return '';
+    const formData = new FormData();
+    formData.append('image', imageFile);
+
+    try {
+      const res = await axios.post('http://localhost:5000/api/items/upload', formData);
+      return res.data.imageUrl;
+    } catch (err) {
+      console.error('Image upload failed:', err);
+      return '';
+    }
+  };
+
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const uploadedImageUrl = await handleImageUpload();
+
     const foundItem = {
       title,
       description,
       location,
       date_found: dateFound,
-      image_url: imageUrl,
+      image_url: uploadedImageUrl,
       user_id: userId,
     };
 
     try {
       const res = await axios.post('http://localhost:5000/api/items/found', foundItem);
-      console.log("Backend Response:", res.data);
       setMessage(res.data.message);
 
       if (res.data.matches && res.data.matches.length > 0) {
         setMatchesFound(true);
-        setFirstMatch(res.data.matches[0]); 
+        setFirstMatch(res.data.matches[0]);
       } else {
         setMatchesFound(false);
         setFirstMatch(null);
@@ -45,6 +65,15 @@ const FoundForm = () => {
     }
   };
 
+  // Handle image file change
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setImageFile(file);
+    setFileName(file ? file.name : '');
+    setImagePreview(file ? URL.createObjectURL(file) : '');
+  };
+
+  // Navigate to matches
   const handleNavigateToMatches = () => {
     navigate('/matches');
   };
@@ -53,22 +82,23 @@ const FoundForm = () => {
     <div className="form-container">
       <h2>Report Found Item</h2>
       <form onSubmit={handleSubmit}>
-        <label htmlFor="Title">Title</label>
-        <input type="text" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)} required />
-        <label htmlFor="Description">Description</label>
-        <textarea placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
-        <label htmlFor="location">Location</label>
-        <input type="text" placeholder="Location" value={location} onChange={(e) => setLocation(e.target.value)} required />
-        <label htmlFor="date">Found Date</label>
-        <input
-          type="date"
-          id="date"
-          value={dateFound}
-          onChange={(e) => setDateFound(e.target.value)}
-          required
-        />
-        <label htmlFor="Image">Image</label>
-        <input type="text" placeholder="Image URL" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
+        <label>Title</label>
+        <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
+
+        <label>Description</label>
+        <textarea value={description} onChange={(e) => setDescription(e.target.value)} />
+
+        <label>Location</label>
+        <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} required />
+
+        <label>Found Date</label>
+        <input type="date" value={dateFound} onChange={(e) => setDateFound(e.target.value)} required />
+
+        <label>Upload Image</label>
+        <input type="file" accept="image/*" onChange={handleFileChange} />
+        {fileName && <p className="file-name">Selected file: {fileName}</p>}
+        {imagePreview && <img src={imagePreview} alt="Preview" className="preview-image" />}
+
         <button type="submit">Submit</button>
       </form>
 
@@ -77,27 +107,13 @@ const FoundForm = () => {
       {matchesFound && firstMatch && (
         <div className="matches-container">
           <h3>Match Found!</h3>
-          <div className="match-details">
-            <h4>Lost Item</h4>
-            <p><strong>Title:</strong> {firstMatch.lost_title}</p>
-            <p><strong>Description:</strong> {firstMatch.lost_description}</p>
-            <p><strong>Location:</strong> {firstMatch.lost_location}</p>
-            {firstMatch.lost_image_url && (
-              <img src={firstMatch.lost_image_url} alt="Lost item" style={{ maxWidth: '100%', height: 'auto', marginBottom: '15px' }} />
-            )}
-
-            <h4>Found Item</h4>
-            <p><strong>Title:</strong> {firstMatch.found_title}</p>
-            <p><strong>Description:</strong> {firstMatch.found_description}</p>
-            <p><strong>Location:</strong> {firstMatch.found_location}</p>
-            {firstMatch.found_image_url && (
-              <img src={firstMatch.found_image_url} alt="Found item" style={{ maxWidth: '100%', height: 'auto', marginBottom: '15px' }} />
-            )}
-
-          
-            
+          <p><strong>Lost:</strong> {firstMatch.lost_title} - {firstMatch.lost_location}</p>
+          <div className="match-images-container">
+            <img src={firstMatch.lost_image_url} alt="Lost" className="match-image" />
+            <img src={firstMatch.found_image_url} alt="Found" className="match-image" />
           </div>
-          <button onClick={handleNavigateToMatches} className="navigate-button">Go to Matches</button>
+          <p><strong>Found:</strong> {firstMatch.found_title} - {firstMatch.found_location}</p>
+          <button onClick={handleNavigateToMatches}>Go to Matches</button>
         </div>
       )}
     </div>

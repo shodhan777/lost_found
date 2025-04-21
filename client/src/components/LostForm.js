@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import axios from 'axios';
 import './LostForm.css';
@@ -9,9 +8,9 @@ function LostForm() {
     description: '',
     location: '',
     date_lost: '',
-    image_url: ''
   });
 
+  const [imageFile, setImageFile] = useState(null);
   const [message, setMessage] = useState('');
 
   const handleChange = (e) => {
@@ -19,10 +18,32 @@ function LostForm() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleImageUpload = async () => {
+    if (!imageFile) return '';
+
+    const formData = new FormData();
+    formData.append('image', imageFile);
+
+    try {
+      const res = await axios.post('http://localhost:5000/api/items/upload', formData);
+      return res.data.imageUrl;
+    } catch (err) {
+      console.error('Image upload failed:', err);
+      return '';
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/items/lost', formData);
+      const uploadedImageUrl = await handleImageUpload();
+
+      const lostItem = {
+        ...formData,
+        image_url: uploadedImageUrl,
+      };
+
+      const res = await axios.post('http://localhost:5000/api/items/lost', lostItem);
       setMessage(res.data.message || 'Lost item submitted successfully');
     } catch (err) {
       console.error('Error submitting lost item:', err);
@@ -69,12 +90,11 @@ function LostForm() {
           required
         />
 
-        <label htmlFor="image_url">Image URL</label>
+        <label htmlFor="image">Upload Image</label>
         <input
-          name="image_url"
-          placeholder="Image URL"
-          value={formData.image_url}
-          onChange={handleChange}
+          type="file"
+          accept="image/*"
+          onChange={(e) => setImageFile(e.target.files[0])}
         />
 
         <button type="submit">Submit</button>
@@ -86,4 +106,3 @@ function LostForm() {
 }
 
 export default LostForm;
-  
