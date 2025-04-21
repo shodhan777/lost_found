@@ -11,45 +11,33 @@ const FoundForm = () => {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const [fileName, setFileName] = useState('');
-  const [userId] = useState(1);
+  const [userId] = useState(1); // hardcoded user_id for now
   const [message, setMessage] = useState('');
   const [matchesFound, setMatchesFound] = useState(false);
   const [firstMatch, setFirstMatch] = useState(null);
 
   const navigate = useNavigate();
 
-  // Handle image upload
-  const handleImageUpload = async () => {
-    if (!imageFile) return '';
-    const formData = new FormData();
-    formData.append('image', imageFile);
-
-    try {
-      const res = await axios.post('http://localhost:5000/api/items/upload', formData);
-      return res.data.imageUrl;
-    } catch (err) {
-      console.error('Image upload failed:', err);
-      return '';
-    }
-  };
-
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const uploadedImageUrl = await handleImageUpload();
-
-    const foundItem = {
-      title,
-      description,
-      location,
-      date_found: dateFound,
-      image_url: uploadedImageUrl,
-      user_id: userId,
-    };
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('location', location);
+    formData.append('date_found', dateFound);
+    formData.append('user_id', userId);
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
 
     try {
-      const res = await axios.post('http://localhost:5000/api/items/found', foundItem);
+      const res = await axios.post('http://localhost:5000/api/items/found', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
       setMessage(res.data.message);
 
       if (res.data.matches && res.data.matches.length > 0) {
@@ -65,7 +53,6 @@ const FoundForm = () => {
     }
   };
 
-  // Handle image file change
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setImageFile(file);
@@ -73,7 +60,6 @@ const FoundForm = () => {
     setImagePreview(file ? URL.createObjectURL(file) : '');
   };
 
-  // Navigate to matches
   const handleNavigateToMatches = () => {
     navigate('/matches');
   };
@@ -109,8 +95,20 @@ const FoundForm = () => {
           <h3>Match Found!</h3>
           <p><strong>Lost:</strong> {firstMatch.lost_title} - {firstMatch.lost_location}</p>
           <div className="match-images-container">
-            <img src={firstMatch.lost_image_url} alt="Lost" className="match-image" />
-            <img src={firstMatch.found_image_url} alt="Found" className="match-image" />
+            {firstMatch.lost_image_url && (
+              <img
+                src={`http://localhost:5000${firstMatch.lost_image_url}`}
+                alt="Lost"
+                className="match-image"
+              />
+            )}
+            {firstMatch.found_image_url && (
+              <img
+                src={`http://localhost:5000${firstMatch.found_image_url}`}
+                alt="Found"
+                className="match-image"
+              />
+            )}
           </div>
           <p><strong>Found:</strong> {firstMatch.found_title} - {firstMatch.found_location}</p>
           <button onClick={handleNavigateToMatches}>Go to Matches</button>

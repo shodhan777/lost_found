@@ -24,7 +24,7 @@ const pool = mysql.createPool({
 // Multer configuration for image uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'upload/');
+    cb(null, 'uploads/');
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
@@ -40,6 +40,22 @@ app.use('/api/items', itemRoutes);
 
 const authRoutes = require('./routes/auth')(pool);
 app.use('/api/auth', authRoutes);
+
+app.post('/uploads', upload.single('image'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send('No file uploaded.');
+  }
+
+  const image_url = `http://localhost:5000/uploads/${req.file.filename}`;
+  console.log("Generated image_url:", image_url);
+
+  res.json({
+    imageUrl: image_url,
+  });
+});
+
+
+app.use('/uploads', express.static('uploads'));
 
 // Start server
 app.listen(5000, () => {

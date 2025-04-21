@@ -24,6 +24,9 @@ module.exports = (pool) => {
 
     try {
       // Insert the found item
+
+      console.log("Inserting data with image_url:", image_url);
+
       const [result] = await pool.query(
         'INSERT INTO found_items (user_id, title, description, location, date_found, image_url) VALUES (?, ?, ?, ?, ?, ?)',
         [user_id, title, description, location, date_found, image_url]
