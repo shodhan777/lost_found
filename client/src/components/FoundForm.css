@@ -1,4 +1,4 @@
-/* Body Styling */
+
 body {
   background-color: #f0f4f8;
   font-family: 'Arial', sans-serif;
@@ -11,7 +11,7 @@ body {
   box-sizing: border-box;
 }
 
-/* Heading Styling */
+
 h2 {
   font-size: 2rem;
   color: #3f51b5;
@@ -21,7 +21,7 @@ h2 {
   letter-spacing: 1px;
 }
 
-/* Form Container Styling */
+
 .form-container {
   background: linear-gradient(135deg, #ffffff, #f7f7f7);
   padding: 40px;
@@ -32,15 +32,15 @@ h2 {
   width: 100%;
   transition: all 0.3s ease-in-out;
   border: 1px solid #ddd;
-  max-height: 90vh; /* Limits the height */
-  overflow-y: auto; /* Enables scrolling */
+  max-height: 90vh; 
+  overflow-y: auto; 
 }
 
 .form-container:hover {
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
 }
 
-/* Form Styling */
+
 form {
   display: flex;
   flex-direction: column;
@@ -83,7 +83,7 @@ input[type="date"]:focus::placeholder {
   color: #4CAF50;
 }
 
-/* File Name Styling */
+
 .file-name {
   font-size: 0.9rem;
   color: #666;
@@ -91,7 +91,7 @@ input[type="date"]:focus::placeholder {
   font-style: italic;
 }
 
-/* Preview Image Styling */
+
 .preview-image {
   max-width: 100%;
   max-height: 300px;
@@ -101,7 +101,7 @@ input[type="date"]:focus::placeholder {
   object-fit: contain;
 }
 
-/* Button Styling */
+
 button {
   background-color: #3f51b5;
   color: white;
@@ -126,7 +126,6 @@ button:active {
   transform: scale(1);
 }
 
-/* Matches Container Styling */
 .matches-container {
   background-color: #e8f5e9;
   padding: 30px;
@@ -151,7 +150,7 @@ button:active {
   letter-spacing: 1px;
 }
 
-/* Match Item Styling */
+
 .match-item {
   background-color: #ffffff;
   border-radius: 8px;
@@ -188,14 +187,13 @@ button:active {
   object-fit: contain;
 }
 
-/* Text Styling */
+
 p {
   font-size: 1rem;
   text-align: center;
   color: #333;
 }
 
-/* Label Styling */
 label {
   font-weight: bold;
   margin-bottom: 6px;
@@ -203,9 +201,9 @@ label {
   color: #3f51b5;
 }
 
-/* Media Query for Small Screens */
+
 @media (max-width: 768px) {
-  /* Form Container */
+ 
   .form-container {
     padding: 20px;
     max-width: 100%;
@@ -250,7 +248,7 @@ label {
 }
 
 @media (max-width: 480px) {
-  /* Small Devices */
+ 
   h2 {
     font-size: 1.5rem;
   }

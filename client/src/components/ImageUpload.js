@@ -19,7 +19,7 @@ const ImageUpload = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-      setImageUrl(response.data.imageUrl); // Set the image URL to state
+      setImageUrl(response.data.imageUrl); 
     } catch (error) {
       console.error('Error uploading image:', error);
     }

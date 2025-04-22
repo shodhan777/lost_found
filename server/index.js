@@ -6,14 +6,14 @@ const multer = require('multer');
 
 const app = express();
 
-// Middleware
+
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from /upload directory
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// MySQL connection pool
+
 const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
@@ -21,7 +21,7 @@ const pool = mysql.createPool({
   database: 'hi',
 });
 
-// Multer configuration for image uploads
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
@@ -33,8 +33,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Routes
-// Importing routes
+
 const itemRoutes = require('./routes/items')(pool, upload);
 app.use('/api/items', itemRoutes);
 
@@ -57,7 +56,7 @@ app.post('/uploads', upload.single('image'), (req, res) => {
 
 app.use('/uploads', express.static('uploads'));
 
-// Start server
+
 app.listen(5000, () => {
-  console.log('✅ Server running on port 5000');
+  console.log(' Server running on port 5000');
 });
