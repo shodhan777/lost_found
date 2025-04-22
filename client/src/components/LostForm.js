@@ -11,7 +11,7 @@ function LostForm() {
   });
 
   const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState('');  // Preview for the image
+  const [imagePreview, setImagePreview] = useState('');  
   const [message, setMessage] = useState('');
 
   const handleChange = (e) => {
@@ -23,7 +23,7 @@ function LostForm() {
     const file = e.target.files[0];
     setImageFile(file);
 
-    // Create a preview of the image for the user
+    
     if (file) {
       setImagePreview(URL.createObjectURL(file));
     } else {
@@ -37,12 +37,12 @@ function LostForm() {
     try {
       const lostItemData = new FormData();
 
-      // Append form data
+     
       Object.keys(formData).forEach((key) => {
         lostItemData.append(key, formData[key]);
       });
 
-      // Append image file if present
+      
       if (imageFile) {
         lostItemData.append('image', imageFile);
       }

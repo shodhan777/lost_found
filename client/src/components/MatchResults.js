@@ -11,7 +11,7 @@ function MatchedResults() {
     const fetchMatches = async () => {
       try {
         const res = await axios.get('http://localhost:5000/api/items/matches');
-        console.log(res.data); // Debugging: log the response
+        console.log(res.data); 
         setMatches(res.data);
       } catch (err) {
         console.error('Error fetching matches:', err);
@@ -48,9 +48,9 @@ function MatchedResults() {
               <p><strong>Title:</strong> {match.lost_title}</p>
               <p><strong>Description:</strong> {match.lost_description}</p>
               <p><strong>Location:</strong> {match.lost_location}</p>
-              {match.lost_image_url && (
+              {match.lost_image && (
                 <img
-                  src={`http://localhost:5000/uploads/${match.lost_image_url}`}
+                  src={`http://localhost:5000${match.lost_image}`}
                   alt="Lost item"
                   className="match-item-image"
                 />
@@ -60,9 +60,9 @@ function MatchedResults() {
               <p><strong>Title:</strong> {match.found_title}</p>
               <p><strong>Description:</strong> {match.found_description}</p>
               <p><strong>Location:</strong> {match.found_location}</p>
-              {match.found_image_url && (
+              {match.found_image && (
                 <img
-                  src={`http://localhost:5000/uploads/${match.found_image_url}`}
+                  src={`http://localhost:5000${match.found_image}`}
                   alt="Found item"
                   className="match-item-image"
                 />

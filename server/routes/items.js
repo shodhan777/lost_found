@@ -2,13 +2,13 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 
-// Set up Multer storage
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Save images in the "uploads" folder
+    cb(null, 'uploads/'); 
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Use current timestamp as the filename
+    cb(null, Date.now() + path.extname(file.originalname)); 
   }
 });
 
@@ -22,7 +22,7 @@ module.exports = (pool) => {
     const image_url = req.file ? `/uploads/${req.file.filename}` : null;
   
     try {
-      // Insert the found item
+     
       const [result] = await pool.query(
         'INSERT INTO found_items (user_id, title, description, location, date_found, image_url) VALUES (?, ?, ?, ?, ?, ?)',
         [user_id, title, description, location, date_found, image_url]
@@ -30,7 +30,7 @@ module.exports = (pool) => {
   
       const foundItemId = result.insertId;
   
-      // Match with lost items based on title similarity
+      
       const [matchedLostItems] = await pool.query(
         `SELECT * FROM lost_items WHERE title LIKE ?`,
         [`%${title}%`]
@@ -39,7 +39,7 @@ module.exports = (pool) => {
       const matches = [];
   
       for (let lostItem of matchedLostItems) {
-        // Insert into match table
+       
         const [matchInsert] = await pool.query(
           `INSERT INTO matches (lost_item_id, found_item_id, status, matched_on, lost_image, found_image)
            VALUES (?, ?, 'matched', NOW(), ?, ?)`,
@@ -74,14 +74,13 @@ module.exports = (pool) => {
     }
   });
   
-  
-  // Lost Item route with image upload
+
   router.post('/lost', upload.single('image'), async (req, res) => {
     const { title, description, location, date_lost } = req.body;
-    const image_url = req.file ? `/uploads/${req.file.filename}` : null; // Image URL based on file name
+    const image_url = req.file ? `/uploads/${req.file.filename}` : null;
 
     try {
-      // Insert the lost item
+      
       const [result] = await pool.query(
         'INSERT INTO lost_items (title, description, location, date_lost, image_url) VALUES (?, ?, ?, ?, ?)',
         [title, description, location, date_lost, image_url]
@@ -94,7 +93,7 @@ module.exports = (pool) => {
     }
   });
 
-  // Fetch matches route
+ 
   router.get('/matches', async (req, res) => {
     try {
       const [rows] = await pool.query(`
@@ -103,12 +102,12 @@ module.exports = (pool) => {
   lost_items.title AS lost_title,
   lost_items.description AS lost_description,
   lost_items.location AS lost_location,
-  lost_items.image_url AS lost_image_url,       
+  lost_items.image_url AS lost_image,       
 
   found_items.title AS found_title,
   found_items.description AS found_description,
   found_items.location AS found_location,
-  found_items.image_url AS found_image_url,     
+  found_items.image_url AS found_image,     
 
   matches.status,
   matches.claim_status,
