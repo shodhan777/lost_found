@@ -93,24 +93,6 @@ const FoundForm = () => {
       {matchesFound && firstMatch && (
   <div className="matches-container">
     <h3>Match Found!</h3>
-    <p><strong>Lost:</strong> {firstMatch.lost_title} - {firstMatch.lost_location}</p>
-    <div className="match-images-container">
-      {firstMatch.lost_image_url && (
-        <img
-          src={`http://localhost:5000${firstMatch.lost_image_url}`}
-          alt="Lost"
-          className="match-image"
-        />
-      )}
-      {firstMatch.found_image_url && (
-        <img
-          src={`http://localhost:5000${firstMatch.found_image_url}`}
-          alt="Found"
-          className="match-image"
-        />
-      )}
-    </div>
-    <p><strong>Found:</strong> {firstMatch.found_title} - {firstMatch.found_location}</p>
     <button onClick={handleNavigateToMatches}>Go to Matches</button>
   </div>
 )}
