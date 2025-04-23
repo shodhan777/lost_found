@@ -17,7 +17,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
-  password: 'shodhan@777',
+  password: 'Happy@999',
   database: 'hi',
 });
 
