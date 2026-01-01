@@ -11,12 +11,28 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Routes
-const authRoutes = require('./routes/auth');
-const itemRoutes = require('./routes/items');
-const adminRoutes = require('./routes/admin');
 
-app.use('/api/auth', authRoutes);
+const pool = mysql.createPool({
+  host: 'localhost',
+  user: 'root',
+  password: 'shodhan@777',
+  database: 'hi',
+});
+
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ storage });
+
+
+const itemRoutes = require('./routes/items')(pool, upload);
 app.use('/api/items', itemRoutes);
 app.use('/api/admin', adminRoutes);
 
