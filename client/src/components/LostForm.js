@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import API from '../api'; // Validate token automatic injection
 import './LostForm.css';
 
 function LostForm() {
@@ -11,7 +11,7 @@ function LostForm() {
   });
 
   const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState('');  
+  const [imagePreview, setImagePreview] = useState('');
   const [message, setMessage] = useState('');
 
   const handleChange = (e) => {
@@ -23,7 +23,7 @@ function LostForm() {
     const file = e.target.files[0];
     setImageFile(file);
 
-    
+
     if (file) {
       setImagePreview(URL.createObjectURL(file));
     } else {
@@ -37,18 +37,18 @@ function LostForm() {
     try {
       const lostItemData = new FormData();
 
-     
+
       Object.keys(formData).forEach((key) => {
         lostItemData.append(key, formData[key]);
       });
 
-      
+
       if (imageFile) {
         lostItemData.append('image', imageFile);
       }
 
-      // Submit the form with image data
-      const res = await axios.post('http://localhost:5000/api/items/lost', lostItemData, {
+      // Submit the form with image data to protected endpoint
+      const res = await API.post('/items/lost', lostItemData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

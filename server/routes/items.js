@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const pool = require('../config/db');
+const auth = require('../middleware/authMiddleware'); // Import middleware
 
 const router = express.Router();
 
@@ -16,8 +17,21 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post('/found', upload.single('image'), async (req, res) => {
-  const { title, description, location, date_found, user_id } = req.body;
+// Helper function for keyword matching
+const buildMatchQuery = (table, text) => {
+  const keywords = text.split(/\s+/).filter(w => w.length > 2); // Ignore short words
+  if (keywords.length === 0) return { query: `SELECT * FROM ${table} WHERE 1=0`, params: [] };
+
+  const conditions = keywords.map(() => `(title LIKE ? OR description LIKE ?)`).join(' OR ');
+  const params = keywords.flatMap(k => [`%${k}%`, `%${k}%`]);
+
+  return { query: `SELECT * FROM ${table} WHERE ${conditions}`, params };
+};
+
+// PROTECTED ROUTE: Report Found Item
+router.post('/found', auth, upload.single('image'), async (req, res) => {
+  const { title, description, location, date_found } = req.body;
+  const user_id = req.user.id; // Securely get ID from token
   const image_url = req.file ? `/uploads/${req.file.filename}` : null;
 
   try {
@@ -28,10 +42,10 @@ router.post('/found', upload.single('image'), async (req, res) => {
 
     const foundItemId = result.insertId;
 
-    const [matchedLostItems] = await pool.query(
-      `SELECT * FROM lost_items WHERE title LIKE ?`,
-      [`%${title}%`]
-    );
+    // --- SMART MATCHING: LOST ITEMS ---
+    const { query, params } = buildMatchQuery('lost_items', title + ' ' + description);
+    const [matchedLostItems] = await pool.query(query, params);
+    // ----------------------------------
 
     const matches = [];
 
@@ -70,8 +84,10 @@ router.post('/found', upload.single('image'), async (req, res) => {
 });
 
 
-router.post('/lost', upload.single('image'), async (req, res) => {
-  const { title, description, location, date_lost, user_id } = req.body;
+// PROTECTED ROUTE: Report Lost Item
+router.post('/lost', auth, upload.single('image'), async (req, res) => {
+  const { title, description, location, date_lost } = req.body;
+  const user_id = req.user.id; // Securely get ID from token
   const image_url = req.file ? `/uploads/${req.file.filename}` : null;
 
   try {
@@ -82,12 +98,10 @@ router.post('/lost', upload.single('image'), async (req, res) => {
 
     const lostItemId = result.insertId;
 
-    // --- Bidirectional Matching Logic ---
-    // Search for existing FOUND items that match this new LOST item
-    const [matchedFoundItems] = await pool.query(
-      `SELECT * FROM found_items WHERE title LIKE ?`,
-      [`%${title}%`]
-    );
+    // --- SMART MATCHING: FOUND ITEMS ---
+    const { query, params } = buildMatchQuery('found_items', title + ' ' + description);
+    const [matchedFoundItems] = await pool.query(query, params);
+    // -----------------------------------
 
     const matches = [];
 
@@ -113,7 +127,6 @@ router.post('/lost', upload.single('image'), async (req, res) => {
         found_image: foundItem.image_url,
       });
     }
-    // ------------------------------------
 
     res.status(201).json({
       message: 'Lost item submitted successfully',
@@ -160,11 +173,14 @@ router.get('/matches', async (req, res) => {
   }
 });
 
+const sendEmail = require('../utils/emailService');
+
 // Claim match route
-router.patch('/match/:id/claim', async (req, res) => {
+router.patch('/match/:id/claim', auth, async (req, res) => {
   const matchId = req.params.id;
 
   try {
+    // 1. Mark as claimed
     const [result] = await pool.query(
       'UPDATE matches SET status = ?, claim_status = ? WHERE id = ?',
       ['claimed', 'claimed', matchId]
@@ -174,7 +190,28 @@ router.patch('/match/:id/claim', async (req, res) => {
       return res.status(404).json({ message: 'Match not found' });
     }
 
-    res.json({ message: 'Match marked as claimed' });
+    // 2. Fetch details to send email
+    const [matchDetails] = await pool.query(`
+      SELECT 
+        u.email AS finder_email, 
+        f.title AS item_title 
+      FROM matches m
+      JOIN found_items f ON m.found_item_id = f.id
+      JOIN users u ON f.user_id = u.id
+      WHERE m.id = ?
+    `, [matchId]);
+
+    // 3. Send Notification if user exists
+    if (matchDetails.length > 0) {
+      const { finder_email, item_title } = matchDetails[0];
+      await sendEmail(
+        finder_email,
+        'Item Claimed!',
+        `Great news! The item "${item_title}" has been successfully claimed by the owner. Please coordinate the return.`
+      );
+    }
+
+    res.json({ message: 'Match marked as claimed and owner notified' });
   } catch (err) {
     console.error('Error updating match status:', err);
     res.status(500).json({ error: 'Failed to update match status' });

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import API from '../api'; // Use configured API
 import { useNavigate } from 'react-router-dom';
 import './FoundForm.css';
 
@@ -11,7 +11,7 @@ const FoundForm = () => {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const [fileName, setFileName] = useState('');
-  const [userId] = useState(1); 
+  // userId is now handled by the backend via token
   const [message, setMessage] = useState('');
   const [matchesFound, setMatchesFound] = useState(false);
   const [firstMatch, setFirstMatch] = useState(null);
@@ -26,13 +26,13 @@ const FoundForm = () => {
     formData.append('description', description);
     formData.append('location', location);
     formData.append('date_found', dateFound);
-    formData.append('user_id', userId);
+    // User ID is extracted from token in backend
     if (imageFile) {
       formData.append('image', imageFile);
     }
 
     try {
-      const res = await axios.post('http://localhost:5000/api/items/found', formData, {
+      const res = await API.post('/items/found', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -91,13 +91,13 @@ const FoundForm = () => {
       {message && <p>{message}</p>}
 
       {matchesFound && firstMatch && (
-  <div className="matches-container">
-    <h3>Match Found!</h3>
-    <button onClick={handleNavigateToMatches}>Go to Matches</button>
-  </div>
-)}
+        <div className="matches-container">
+          <h3>Match Found!</h3>
+          <button onClick={handleNavigateToMatches}>Go to Matches</button>
+        </div>
+      )}
 
-      
+
     </div>
   );
 };
