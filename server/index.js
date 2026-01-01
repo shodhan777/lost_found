@@ -1,8 +1,9 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const db = require('./config/db'); // Import database connection
+const mysql = require('mysql2/promise'); // Using mysql2/promise for async/await support
+const multer = require('multer');
+require('dotenv').config();
 
 const app = express();
 
@@ -11,15 +12,18 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-
+// Database Connection
 const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: 'shodhan@777',
-  database: 'hi',
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || 'Happy@999', // Keeping user's hardcoded password if env matches
+  database: process.env.DB_NAME || 'lost_and_found_db',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
-
+// Configure Multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
@@ -31,9 +35,14 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-
+// Routes
+// Note: We are passing 'pool' and 'upload' to itemRoutes as required by its new structure
 const itemRoutes = require('./routes/items')(pool, upload);
+const authRoutes = require('./routes/auth')(pool); // Assuming auth also needs pool
+const adminRoutes = require('./routes/admin')(pool); // Passing pool to admin as well for consistency
+
 app.use('/api/items', itemRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Global Error Handler
