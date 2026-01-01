@@ -1,153 +1,199 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
+const pool = require('../config/db');
 
+const router = express.Router();
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); 
+    cb(null, 'uploads/');
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); 
+    cb(null, Date.now() + path.extname(file.originalname));
   }
 });
 
 const upload = multer({ storage: storage });
 
-module.exports = (pool) => {
-  const router = express.Router();
+router.post('/found', upload.single('image'), async (req, res) => {
+  const { title, description, location, date_found, user_id } = req.body;
+  const image_url = req.file ? `/uploads/${req.file.filename}` : null;
 
-  router.post('/found', upload.single('image'), async (req, res) => {
-    const { title, description, location, date_found, user_id } = req.body;
-    const image_url = req.file ? `/uploads/${req.file.filename}` : null;
-  
-    try {
-     
-      const [result] = await pool.query(
-        'INSERT INTO found_items (user_id, title, description, location, date_found, image_url) VALUES (?, ?, ?, ?, ?, ?)',
-        [user_id, title, description, location, date_found, image_url]
+  try {
+    const [result] = await pool.query(
+      'INSERT INTO found_items (user_id, title, description, location, date_found, image_url) VALUES (?, ?, ?, ?, ?, ?)',
+      [user_id, title, description, location, date_found, image_url]
+    );
+
+    const foundItemId = result.insertId;
+
+    const [matchedLostItems] = await pool.query(
+      `SELECT * FROM lost_items WHERE title LIKE ?`,
+      [`%${title}%`]
+    );
+
+    const matches = [];
+
+    for (let lostItem of matchedLostItems) {
+      const [matchInsert] = await pool.query(
+        `INSERT INTO matches (lost_item_id, found_item_id, status, matched_on, lost_image, found_image)
+         VALUES (?, ?, 'matched', NOW(), ?, ?)`,
+        [lostItem.id, foundItemId, lostItem.image_url, image_url]
       );
-  
-      const foundItemId = result.insertId;
-  
-      
-      const [matchedLostItems] = await pool.query(
-        `SELECT * FROM lost_items WHERE title LIKE ?`,
-        [`%${title}%`]
-      );
-  
-      const matches = [];
-  
-      for (let lostItem of matchedLostItems) {
-       
-        const [matchInsert] = await pool.query(
-          `INSERT INTO matches (lost_item_id, found_item_id, status, matched_on, lost_image, found_image)
-           VALUES (?, ?, 'matched', NOW(), ?, ?)`,
-          [lostItem.id, foundItemId, lostItem.image_url, image_url]
-        );
-        
-  
-        matches.push({
-          match_id: matchInsert.insertId,
-          lost_item_id: lostItem.id,
-          lost_title: lostItem.title,
-          lost_description: lostItem.description,
-          lost_location: lostItem.location,
-          lost_image: lostItem.image_url,
-  
-          found_item_id: foundItemId,
-          found_title: title,
-          found_description: description  ,
-          found_location: location,
-          found_image: image_url,
-        });
-      }
-  
-      res.status(201).json({
-        message: 'Found item reported successfully',
-        matches: matches
+
+      matches.push({
+        match_id: matchInsert.insertId,
+        lost_item_id: lostItem.id,
+        lost_title: lostItem.title,
+        lost_description: lostItem.description,
+        lost_location: lostItem.location,
+        lost_image: lostItem.image_url,
+
+        found_item_id: foundItemId,
+        found_title: title,
+        found_description: description,
+        found_location: location,
+        found_image: image_url,
       });
-  
-    } catch (err) {
-      console.error('Error reporting found item or matching lost items:', err);
-      res.status(500).json({ error: 'Error inserting found item or matching lost items' });
     }
-  });
-  
 
-  router.post('/lost', upload.single('image'), async (req, res) => {
-    const { title, description, location, date_lost } = req.body;
-    const image_url = req.file ? `/uploads/${req.file.filename}` : null;
+    res.status(201).json({
+      message: 'Found item reported successfully',
+      matches: matches
+    });
 
-    try {
-      
-      const [result] = await pool.query(
-        'INSERT INTO lost_items (title, description, location, date_lost, image_url) VALUES (?, ?, ?, ?, ?)',
-        [title, description, location, date_lost, image_url]
+  } catch (err) {
+    console.error('Error reporting found item or matching lost items:', err);
+    res.status(500).json({ error: 'Error inserting found item or matching lost items' });
+  }
+});
+
+
+router.post('/lost', upload.single('image'), async (req, res) => {
+  const { title, description, location, date_lost, user_id } = req.body;
+  const image_url = req.file ? `/uploads/${req.file.filename}` : null;
+
+  try {
+    const [result] = await pool.query(
+      'INSERT INTO lost_items (user_id, title, description, location, date_lost, image_url) VALUES (?, ?, ?, ?, ?, ?)',
+      [user_id, title, description, location, date_lost, image_url]
+    );
+
+    const lostItemId = result.insertId;
+
+    // --- Bidirectional Matching Logic ---
+    // Search for existing FOUND items that match this new LOST item
+    const [matchedFoundItems] = await pool.query(
+      `SELECT * FROM found_items WHERE title LIKE ?`,
+      [`%${title}%`]
+    );
+
+    const matches = [];
+
+    for (let foundItem of matchedFoundItems) {
+      const [matchInsert] = await pool.query(
+        `INSERT INTO matches (lost_item_id, found_item_id, status, matched_on, lost_image, found_image)
+         VALUES (?, ?, 'matched', NOW(), ?, ?)`,
+        [lostItemId, foundItem.id, image_url, foundItem.image_url]
       );
 
-      res.status(201).json({ message: 'Lost item submitted successfully', id: result.insertId });
-    } catch (err) {
-      console.error('Error inserting lost item:', err);
-      res.status(500).json({ error: 'Error inserting lost item' });
+      matches.push({
+        match_id: matchInsert.insertId,
+        lost_item_id: lostItemId,
+        lost_title: title,
+        lost_description: description,
+        lost_location: location,
+        lost_image: image_url,
+
+        found_item_id: foundItem.id,
+        found_title: foundItem.title,
+        found_description: foundItem.description,
+        found_location: foundItem.location,
+        found_image: foundItem.image_url,
+      });
     }
-  });
+    // ------------------------------------
 
- 
-  router.get('/matches', async (req, res) => {
-    try {
-      const [rows] = await pool.query(`
-       SELECT
-  matches.id AS match_id,
-  lost_items.title AS lost_title,
-  lost_items.description AS lost_description,
-  lost_items.location AS lost_location,
-  lost_items.image_url AS lost_image,       
+    res.status(201).json({
+      message: 'Lost item submitted successfully',
+      id: lostItemId,
+      matches: matches // Return matches if any
+    });
+  } catch (err) {
+    console.error('Error inserting lost item or matching:', err);
+    res.status(500).json({ error: 'Error inserting lost item or matching' });
+  }
+});
 
-  found_items.title AS found_title,
-  found_items.description AS found_description,
-  found_items.location AS found_location,
-  found_items.image_url AS found_image,     
 
-  matches.status,
-  matches.claim_status,
-  matches.matched_on,
-  users.email AS user_email
-FROM matches
-JOIN lost_items ON lost_items.id = matches.lost_item_id
-JOIN found_items ON found_items.id = matches.found_item_id
-JOIN users ON users.id = found_items.user_id
-WHERE matches.status = 'matched' AND matches.claim_status = 'unclaimed';
+router.get('/matches', async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT
+        matches.id AS match_id,
+        lost_items.title AS lost_title,
+        lost_items.description AS lost_description,
+        lost_items.location AS lost_location,
+        lost_items.image_url AS lost_image,       
 
-      `);
+        found_items.title AS found_title,
+        found_items.description AS found_description,
+        found_items.location AS found_location,
+        found_items.image_url AS found_image,     
 
-      res.json(rows);
-    } catch (err) {
-      console.error('Error fetching matches:', err);
-      res.status(500).json({ error: 'Failed to fetch matches' });
+        matches.status,
+        matches.claim_status,
+        matches.matched_on,
+        users.email AS user_email
+      FROM matches
+      JOIN lost_items ON lost_items.id = matches.lost_item_id
+      JOIN found_items ON found_items.id = matches.found_item_id
+      JOIN users ON users.id = found_items.user_id
+      WHERE matches.status = 'matched' AND matches.claim_status = 'unclaimed';
+    `);
+
+    res.json(rows);
+  } catch (err) {
+    console.error('Error fetching matches:', err);
+    res.status(500).json({ error: 'Failed to fetch matches' });
+  }
+});
+
+// Claim match route
+router.patch('/match/:id/claim', async (req, res) => {
+  const matchId = req.params.id;
+
+  try {
+    const [result] = await pool.query(
+      'UPDATE matches SET status = ?, claim_status = ? WHERE id = ?',
+      ['claimed', 'claimed', matchId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Match not found' });
     }
-  });
 
-  // Claim match route
-  router.patch('/match/:id/claim', async (req, res) => {
-    const matchId = req.params.id;
+    res.json({ message: 'Match marked as claimed' });
+  } catch (err) {
+    console.error('Error updating match status:', err);
+    res.status(500).json({ error: 'Failed to update match status' });
+  }
+});
 
-    try {
-      const [result] = await pool.query(
-        'UPDATE matches SET status = ?, claim_status = ? WHERE id = ?',
-        ['claimed', 'claimed', matchId]
-      );
+// Get recent items (both lost and found)
+router.get('/recent', async (req, res) => {
+  try {
+    const [lostItems] = await pool.query('SELECT *, "lost" as type FROM lost_items ORDER BY date_lost DESC LIMIT 3');
+    const [foundItems] = await pool.query('SELECT *, "found" as type FROM found_items ORDER BY date_found DESC LIMIT 3');
 
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ message: 'Match not found' });
-      }
+    const recentItems = [...lostItems, ...foundItems].sort((a, b) => new Date(b.created_at || b.date_lost || b.date_found) - new Date(a.created_at || a.date_lost || a.date_found));
 
-      res.json({ message: 'Match marked as claimed' });
-    } catch (err) {
-      console.error('Error updating match status:', err);
-      res.status(500).json({ error: 'Failed to update match status' });
-    }
-  });
+    res.json(recentItems);
+  } catch (err) {
+    console.error('Error fetching recent items:', err);
+    res.status(500).json({ error: 'Failed to fetch recent items' });
+  }
+});
 
-  return router;
-};
+module.exports = router;

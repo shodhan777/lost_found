@@ -8,6 +8,7 @@ import FoundForm from './components/FoundForm';
 import LostForm from './components/LostForm';
 import MatchedResults from './components/MatchResults';
 import ClaimItem from './components/ClaimItem';
+import AdminDashboard from './components/AdminDashboard'; // Import AdminDashboard
 
 function App() {
   return (
@@ -17,10 +18,11 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/admin" element={<AdminDashboard />} /> {/* Admin Route */}
         <Route path="/found" element={<FoundForm />} />
         <Route path="/lost" element={<LostForm />} />
         <Route path="/matches" element={<MatchedResults />} />
-        <Route path="/claim/:id" element={<ClaimItem />} /> 
+        <Route path="/claim/:id" element={<ClaimItem />} />
       </Routes>
     </Router>
   );

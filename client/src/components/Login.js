@@ -1,48 +1,74 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import API from '../api';
 import './Login.css';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
     try {
-      console.log("Trying login with", email, password);
-      const res = await axios.post('http://localhost:5000/api/auth/login', {
-        email,
-        password,
-      });
-      console.log("Login success:", res.data);
+      const res = await API.post('/auth/login', { email, password });
+
       localStorage.setItem('token', res.data.token);
-      navigate('/dashboard');
+      localStorage.setItem('user_id', res.data.user_id);
+      localStorage.setItem('role', res.data.role); // Store role
+
+      if (res.data.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
-      console.error("Full Axios error:", err);
-      alert("Login failed: " + (err.response?.data?.error || "Unknown error"));
+      console.error(err);
+      setError(err.response?.data?.error || 'Login failed. Please try again.');
     }
   };
 
   return (
     <div className="login-container">
-      <h2>Login</h2>
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-      />
-      <button onClick={handleLogin}>Login</button>
-      <p className="signup-link">
-        Don’t have an account? <Link to="/signup">Sign Up</Link>
-      </p>
+      <div className="login-box">
+        <h2>Welcome Back</h2>
+        <p className="subtitle">Login to your account</p>
+
+        {error && <div className="error-message">{error}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <label>Email Address</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+
+          <div className="input-group">
+            <label>Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+
+          <button type="submit" className="login-btn">Login</button>
+        </form>
+
+        <p className="signup-link">
+          Don't have an account? <Link to="/signup">Sign up</Link>
+        </p>
+      </div>
     </div>
   );
 }

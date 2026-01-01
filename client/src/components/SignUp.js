@@ -1,55 +1,82 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import API from '../api';
 import './SignUp.css';
 
 function SignUp() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSignUp = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/register', {
-        username,
-        email,
-        password
-      });
+      const res = await API.post('/auth/signup', { username, email, password });
 
-      console.log("Registration successful:", res.data);
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user_id', res.data.user_id);
+      localStorage.setItem('role', 'user'); // Default role
 
-      alert("Registration successful! Please log in.");
-      navigate('/login');
+      navigate('/dashboard');
     } catch (err) {
-      console.error("Registration error:", err);
-      alert("Registration failed: " + (err.response?.data?.error || "Unknown error"));
+      console.error(err);
+      setError(err.response?.data?.error || 'Signup failed. Please try again.');
     }
   };
 
   return (
     <div className="signup-container">
-      <h2>Sign Up</h2>
-      <input
-        type="text"
-        placeholder="Username"
-        value={username}
-        onChange={e => setUsername(e.target.value)}
-      />
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-      />
-      <button onClick={handleSignUp}>Sign Up</button>
-      <p>Already have an account? <Link to="/login">Log in here</Link></p>
+      <div className="signup-box">
+        <h2>Create Account</h2>
+        <p className="subtitle">Join the community</p>
+
+        {error && <div className="error-message">{error}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <label>Username</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Choose a username"
+              required
+            />
+          </div>
+
+          <div className="input-group">
+            <label>Email Address</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+            />
+          </div>
+
+          <div className="input-group">
+            <label>Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Create a password"
+              required
+            />
+          </div>
+
+          <button type="submit" className="signup-btn">Sign Up</button>
+        </form>
+
+        <p className="login-link">
+          Already have an account? <Link to="/login">Login</Link>
+        </p>
+      </div>
     </div>
   );
 }
