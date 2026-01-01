@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 import Login from './components/Login';
 import SignUp from './components/SignUp';
@@ -11,10 +11,12 @@ import ClaimItem from './components/ClaimItem';
 import AdminDashboard from './components/AdminDashboard'; // Import AdminDashboard
 
 function App() {
+  const isAuthenticated = !!localStorage.getItem('token');
+
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/dashboard" element={<Dashboard />} />
