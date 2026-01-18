@@ -2,7 +2,12 @@ const nodemailer = require('nodemailer');
 
 const sendEmail = async (to, subject, text) => {
     try {
-        // Configure your email service properly in .env
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+            console.log('⚠️  EMAIL_USER or EMAIL_PASS not set. Logging email to console instead.');
+            console.log(`[Email Mock] To: ${to}, Subject: ${subject}, Text: ${text}`);
+            return true;
+        }
+
         const transporter = nodemailer.createTransport({
             service: 'gmail', // or 'smtp.ethereal.email' for testing
             auth: {
