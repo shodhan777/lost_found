@@ -16,7 +16,7 @@ const isAdmin = async (req, res, next) => {
 // Get all users
 router.get('/users', isAdmin, async (req, res) => {
     try {
-        const [users] = await pool.query('SELECT id, username, email, role, created_at FROM users');
+        const [users] = await pool.query('SELECT id, name, email, role, created_at FROM users');
         res.json(users);
     } catch (err) {
         console.error('Error fetching users:', err);
