@@ -68,7 +68,7 @@ router.post('/signup', async (req, res) => {
     const userRole = allowedRoles.includes(role) ? role : 'Student';
 
     const [result] = await pool.query(
-      'INSERT INTO users (name, email, password_hash, id_number, role, contact_info) VALUES (?, ?, ?, ?, ?, ?)',
+      'INSERT INTO users (name, email, password_hash, id_number, role, contact_info) VALUES (?, ?, ?, ?, ?, ?) RETURNING id',
       [name, email, hashedPassword, idNo, userRole, contact]
     );
 
@@ -85,7 +85,15 @@ router.post('/signup', async (req, res) => {
       token: token,
       user_id: userId,
       role: userRole,
-      name: name
+      name: name,
+      user: {
+        id: userId,
+        name: name,
+        email: email,
+        role: userRole,
+        id_number: idNo,
+        contact: contact
+      }
     });
   } catch (err) {
     console.error('Signup error:', err);

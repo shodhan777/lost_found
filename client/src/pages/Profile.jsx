@@ -8,6 +8,7 @@ const Profile = () => {
     const [profile, setProfile] = useState(null);
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     // Get current user ID from local storage (set during login)
     const getUser = () => {
@@ -20,6 +21,7 @@ const Profile = () => {
     useEffect(() => {
         if (user && user.id) {
             setLoading(true);
+            setError('');
             Promise.all([
                 fetchUserProfile(user.id),
                 fetchUserHistory(user.id)
@@ -29,10 +31,13 @@ const Profile = () => {
                 setLoading(false);
             }).catch(err => {
                 console.error('Error fetching profile:', err);
+                setError(err.response?.data?.error || 'Unable to load profile data.');
                 setLoading(false);
             });
+        } else {
+            setLoading(false);
         }
-    }, []);
+    }, [user?.id]);
 
     const handleSave = () => {
         if (!profile) return;
@@ -59,6 +64,21 @@ const Profile = () => {
 
     if (loading) {
         return <div className="container" style={{ padding: '4rem', color: 'white' }}>Loading...</div>;
+    }
+
+    if (!profile) {
+        return (
+            <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+                <Navbar />
+                <div className="container" style={{ padding: '4rem', color: 'white', flex: 1 }}>
+                    <h2 className="section-title">My Profile</h2>
+                    <div className="glass-panel" style={{ padding: '1.5rem', marginTop: '1.5rem' }}>
+                        {error || 'Profile data is not available right now. Please login again and retry.'}
+                    </div>
+                </div>
+                <Footer />
+            </div>
+        );
     }
 
     return (

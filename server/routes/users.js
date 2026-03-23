@@ -54,8 +54,8 @@ router.get('/:id/history', auth, async (req, res) => {
             return res.status(403).json({ error: 'Unauthorized' });
         }
 
-        const [lost] = await pool.query('SELECT *, "lost" as type FROM lost_items WHERE user_id = ? ORDER BY created_at DESC', [req.params.id]);
-        const [found] = await pool.query('SELECT *, "found" as type FROM found_items WHERE user_id = ? ORDER BY created_at DESC', [req.params.id]);
+        const [lost] = await pool.query("SELECT *, 'lost' as type FROM lost_items WHERE user_id = ? ORDER BY created_at DESC", [req.params.id]);
+        const [found] = await pool.query("SELECT *, 'found' as type FROM found_items WHERE user_id = ? ORDER BY created_at DESC", [req.params.id]);
 
         const history = [...lost, ...found].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 

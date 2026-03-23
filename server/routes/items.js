@@ -76,7 +76,7 @@ const buildMatchQuery = (table, text) => {
   const keywords = text.split(/\s+/).filter(w => w.length > 2); // Ignore short words
   if (keywords.length === 0) return { query: `SELECT * FROM ${table} WHERE 1=0`, params: [] };
 
-  const conditions = keywords.map(() => `(name LIKE ? OR description LIKE ?)`).join(' OR ');
+  const conditions = keywords.map(() => `(name ILIKE ? OR description ILIKE ?)`).join(' OR ');
   const params = keywords.flatMap(k => [`%${k}%`, `%${k}%`]);
 
   return { query: `SELECT * FROM ${table} WHERE ${conditions}`, params };
@@ -94,7 +94,7 @@ router.post('/found', auth, upload.single('image'), async (req, res) => {
     }
 
     const [result] = await pool.query(
-      'INSERT INTO found_items (user_id, name, description, location, date_found, time_found, contact_info, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO found_items (user_id, name, description, location, date_found, time_found, contact_info, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id',
       [user_id, name, description, location, date, time, contact, image_url]
     );
 
@@ -110,12 +110,12 @@ router.post('/found', auth, upload.single('image'), async (req, res) => {
     for (let lostItem of matchedLostItems) {
       const [matchInsert] = await pool.query(
         `INSERT INTO matches (lost_item_id, found_item_id, status, matched_on, lost_image, found_image)
-         VALUES (?, ?, 'matched', NOW(), ?, ?)`,
+         VALUES (?, ?, 'matched', NOW(), ?, ?) RETURNING id`,
         [lostItem.id, foundItemId, lostItem.image_url, image_url]
       );
 
       // Update LOST item status to 'found'
-      await pool.query('UPDATE lost_items SET status = "found" WHERE id = ?', [lostItem.id]);
+      await pool.query("UPDATE lost_items SET status = 'found' WHERE id = ?", [lostItem.id]);
 
       matches.push({
         match_id: matchInsert.insertId,
@@ -157,7 +157,7 @@ router.post('/lost', auth, upload.single('image'), async (req, res) => {
     }
 
     const [result] = await pool.query(
-      'INSERT INTO lost_items (user_id, name, description, location, date_lost, time_lost, contact_info, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      'INSERT INTO lost_items (user_id, name, description, location, date_lost, time_lost, contact_info, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING id',
       [user_id, name, description, location, date, time, contact, image_url]
     );
 
@@ -173,12 +173,12 @@ router.post('/lost', auth, upload.single('image'), async (req, res) => {
     for (let foundItem of matchedFoundItems) {
       const [matchInsert] = await pool.query(
         `INSERT INTO matches (lost_item_id, found_item_id, status, matched_on, lost_image, found_image)
-         VALUES (?, ?, 'matched', NOW(), ?, ?)`,
+         VALUES (?, ?, 'matched', NOW(), ?, ?) RETURNING id`,
         [lostItemId, foundItem.id, image_url, foundItem.image_url]
       );
 
       // Update LOST item status to 'found'
-      await pool.query('UPDATE lost_items SET status = "found" WHERE id = ?', [lostItemId]);
+      await pool.query("UPDATE lost_items SET status = 'found' WHERE id = ?", [lostItemId]);
 
       matches.push({
         match_id: matchInsert.insertId,
@@ -210,7 +210,7 @@ router.post('/lost', auth, upload.single('image'), async (req, res) => {
 // GET all active Found items
 router.get('/found', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT *, "found" as type FROM found_items ORDER BY date_found DESC');
+    const [rows] = await pool.query("SELECT *, 'found' as type FROM found_items ORDER BY date_found DESC");
     res.json(rows);
   } catch (err) {
     console.error('Error fetching found items:', err);
@@ -221,7 +221,7 @@ router.get('/found', async (req, res) => {
 // GET all active Lost items
 router.get('/lost', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT *, "lost" as type FROM lost_items ORDER BY date_lost DESC');
+    const [rows] = await pool.query("SELECT *, 'lost' as type FROM lost_items ORDER BY date_lost DESC");
     res.json(rows);
   } catch (err) {
     console.error('Error fetching lost items:', err);
@@ -311,8 +311,8 @@ router.patch('/match/:id/claim', auth, async (req, res) => {
 // Get recent items (both lost and found)
 router.get('/recent', async (req, res) => {
   try {
-    const [lostItems] = await pool.query('SELECT *, "lost" as type FROM lost_items ORDER BY date_lost DESC LIMIT 3');
-    const [foundItems] = await pool.query('SELECT *, "found" as type FROM found_items ORDER BY date_found DESC LIMIT 3');
+    const [lostItems] = await pool.query("SELECT *, 'lost' as type FROM lost_items ORDER BY date_lost DESC LIMIT 3");
+    const [foundItems] = await pool.query("SELECT *, 'found' as type FROM found_items ORDER BY date_found DESC LIMIT 3");
 
     const recentItems = [...lostItems, ...foundItems].sort((a, b) => new Date(b.created_at || b.date_lost || b.date_found) - new Date(a.created_at || a.date_lost || a.date_found));
 

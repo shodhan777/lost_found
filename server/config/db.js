@@ -29,9 +29,21 @@ const poolWrapper = {
         
         // 2. Execute the query using pg
         const result = await pgPool.query(pgQuery, params);
-        
-        // 3. Emulate `mysql2` response format: [rows, fields]
-        return [result.rows, result.fields];
+
+        // 3. Emulate `mysql2` response format: [rows/meta, fields]
+        // SELECT-like commands return rows directly; mutation queries return
+        // metadata with `insertId`/`affectedRows` used by existing code.
+        const command = (result.command || '').toUpperCase();
+        if (command === 'SELECT' || command === 'SHOW' || command === 'WITH') {
+            return [result.rows, result.fields];
+        }
+
+        return [{
+            insertId: result.rows?.[0]?.id ?? null,
+            affectedRows: result.rowCount ?? 0,
+            rowCount: result.rowCount ?? 0,
+            rows: result.rows ?? []
+        }, result.fields];
     },
     
     // Wrap the getConnection function
@@ -43,7 +55,16 @@ const poolWrapper = {
                 let index = 1;
                 const pgQuery = text.replace(/\?/g, () => `$${index++}`);
                 const result = await client.query(pgQuery, params);
-                return [result.rows, result.fields];
+                const command = (result.command || '').toUpperCase();
+                if (command === 'SELECT' || command === 'SHOW' || command === 'WITH') {
+                    return [result.rows, result.fields];
+                }
+                return [{
+                    insertId: result.rows?.[0]?.id ?? null,
+                    affectedRows: result.rowCount ?? 0,
+                    rowCount: result.rowCount ?? 0,
+                    rows: result.rows ?? []
+                }, result.fields];
             },
             release: () => client.release(),
         };

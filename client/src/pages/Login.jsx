@@ -11,6 +11,7 @@ const Login = () => {
         password: '',
     });
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -19,6 +20,7 @@ const Login = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
 
         login(formData)
             .then((res) => {
@@ -30,6 +32,9 @@ const Login = () => {
             .catch((err) => {
                 console.error('Login error:', err);
                 setError(err.response?.data?.error || 'Invalid email or password.');
+            })
+            .finally(() => {
+                setLoading(false);
             });
     };
 
@@ -71,8 +76,8 @@ const Login = () => {
                             />
                         </div>
 
-                        <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>
-                            Sign In
+                        <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }} disabled={loading}>
+                            {loading ? 'Signing In...' : 'Sign In'}
                         </button>
                     </form>
 

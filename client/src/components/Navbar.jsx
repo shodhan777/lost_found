@@ -54,9 +54,9 @@ const Navbar = () => {
                         </Link>
                         <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'white', fontWeight: '500', textDecoration: 'none' }}>
                             <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), var(--accent))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.9rem' }}>
-                                {user.name.charAt(0)}
+                                {user?.name?.charAt(0) || 'U'}
                             </div>
-                            {user.name}
+                            {user?.name || 'User'}
                         </Link>
                         <button onClick={handleLogout} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-dim)' }} title="Logout">
                             <LogOut size={20} />
@@ -88,7 +88,7 @@ const Navbar = () => {
                     {user ? (
                         <>
                             <Link to="/report-lost" onClick={toggleMenu} style={{ color: 'var(--primary)', padding: '0.5rem', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Report Lost Item</Link>
-                            <Link to="/profile" onClick={toggleMenu} style={{ color: 'white', padding: '0.5rem', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>My Profile ({user.name})</Link>
+                            <Link to="/profile" onClick={toggleMenu} style={{ color: 'white', padding: '0.5rem', textDecoration: 'none', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>My Profile ({user?.name || 'User'})</Link>
                             <div onClick={() => { handleLogout(); toggleMenu(); }} style={{ color: '#ef4444', padding: '0.5rem', cursor: 'pointer', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                 <LogOut size={16} /> Logout
                             </div>

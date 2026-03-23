@@ -28,7 +28,7 @@ const Signup = () => {
             .then((res) => {
                 console.log('Signup success:', res.data);
                 localStorage.setItem('token', res.data.token);
-                localStorage.setItem('user', JSON.stringify({ name: res.data.name, role: res.data.role, id: res.data.user_id }));
+                localStorage.setItem('user', JSON.stringify(res.data.user || { name: res.data.name, role: res.data.role, id: res.data.user_id }));
                 navigate('/');
             })
             .catch((err) => {
