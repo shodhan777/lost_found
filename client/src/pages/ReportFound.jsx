@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import { Upload } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { reportFoundItem } from '../api';
 
 const ReportFound = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [formData, setFormData] = useState({
-        name: '',
+        name: location.state?.name || '',
         location: '',
         date: '',
         time: '',
         contact: '',
-        description: '',
+        description: location.state?.description || '',
     });
     const [image, setImage] = useState(null);
     const [preview, setPreview] = useState(null);

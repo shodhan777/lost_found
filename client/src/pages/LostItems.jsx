@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Calendar, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { fetchLostItems } from '../api';
 
 const LostItems = () => {
+    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -80,6 +82,13 @@ const LostItems = () => {
                                     </div>
                                     <button className="btn btn-secondary" style={{ width: '100%', justifyContent: 'space-between' }}>
                                         View Details <ArrowRight size={16} />
+                                    </button>
+                                    <button 
+                                        className="btn btn-primary" 
+                                        style={{ width: '100%', justifyContent: 'center', marginTop: '0.8rem' }}
+                                        onClick={() => navigate('/report-found', { state: { name: item.name, description: item.description } })}
+                                    >
+                                        I Found This
                                     </button>
                                 </div>
                             </div>
