@@ -21,19 +21,30 @@ const serviceAccount = {
     client_x509_cert_url: process.env.FIREBASE_CLIENT_CERT_URL
 };
 
-// Check if critical variables are present
-if (!serviceAccount.project_id || !serviceAccount.private_key || !serviceAccount.client_email) {
-    console.error("❌ Firebase environment variables missing. Please check your .env or Railway variables.");
-} else {
-    try {
+const firebaseConfigured = Boolean(
+    serviceAccount.project_id &&
+    serviceAccount.private_key &&
+    serviceAccount.client_email
+);
+
+if (!firebaseConfigured) {
+    console.warn("Firebase not configured. Falling back to local file uploads.");
+    module.exports = null;
+    return;
+}
+
+try {
+    if (!admin.apps.length) {
         admin.initializeApp({
             credential: admin.credential.cert(serviceAccount),
             storageBucket: process.env.FIREBASE_STORAGE_BUCKET
         });
-        console.log("✅ Firebase Admin initialized successfully");
-    } catch (error) {
-        console.error("❌ Firebase initialization error:", error);
     }
+    console.log("✅ Firebase Admin initialized successfully");
+} catch (error) {
+    console.error("❌ Firebase initialization error. Falling back to local uploads:", error);
+    module.exports = null;
+    return;
 }
 
 const bucket = admin.storage().bucket();

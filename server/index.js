@@ -6,12 +6,34 @@ const path = require('path');
 const db = require('./config/db'); // Initialize DB connection
 
 const app = express();
+const allowedOrigins = (process.env.CORS_ORIGIN || '')
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean);
 
 // Middleware
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" } // Allow serving images from /uploads
 }));
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow local tools without origin (like Postman)
+    if (!origin) return callback(null, true);
+    
+    // If specific origins are defined, enforce them strictly
+    if (allowedOrigins.length > 0) {
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error('Not allowed by CORS'));
+    }
+    
+    // Strict fallback for development if .env is unconfigured
+    if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      return callback(null, true);
+    }
+    
+    return callback(new Error('Not allowed by CORS'));
+  }
+}));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -25,18 +47,16 @@ app.use('/api/items', itemRoutes);
 app.use('/api/users', require('./routes/users'));
 app.use('/api/admin', adminRoutes);
 
-// Serve static files from the React app
-app.use(express.static(path.join(__dirname, '../client/dist')));
-
-// The "catchall" handler: for any request that doesn't
-// match one above, send back React's index.html file.
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true });
 });
 
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({ error: 'CORS origin denied' });
+  }
   res.status(500).json({ error: 'Something went wrong!' });
 });
 

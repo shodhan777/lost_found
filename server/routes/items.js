@@ -1,14 +1,27 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const pool = require('../config/db');
 const auth = require('../middleware/authMiddleware'); // Import middleware
 const bucket = require('../config/firebase'); // Import Firebase Bucket
 
 const router = express.Router();
 
-// Use Memory Storage for Firebase Uploads
-const storage = multer.memoryStorage();
+const uploadsDir = path.join(__dirname, '../uploads');
+
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const storage = bucket ? multer.memoryStorage() : multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadsDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const baseName = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_-]/g, '_');
+    cb(null, `${Date.now()}-${baseName}${ext}`);
+  }
+});
 
 const fileFilter = (req, file, cb) => {
   // Accept images only
@@ -28,6 +41,7 @@ const upload = multer({
 const uploadToFirebase = (file) => {
   return new Promise((resolve, reject) => {
     if (!file) return resolve(null);
+    if (!bucket) return resolve(`/uploads/${file.filename}`);
 
     const fileName = `${Date.now()}_${file.originalname}`;
     const fileUpload = bucket.file(fileName);
