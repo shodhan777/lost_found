@@ -4,8 +4,6 @@ const path = require('path');
 const fs = require('fs');
 const pool = require('../config/db');
 const auth = require('../middleware/authMiddleware'); // Import middleware
-const bucket = require('../config/firebase'); // Import Firebase Bucket
-
 const router = express.Router();
 
 const uploadsDir = path.join(__dirname, '../uploads');
@@ -14,7 +12,7 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-const storage = bucket ? multer.memoryStorage() : multer.diskStorage({
+const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadsDir),
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
@@ -31,46 +29,15 @@ const fileFilter = (req, file, cb) => {
   cb(null, true);
 };
 
+
+
 const upload = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: fileFilter
 });
 
-// Helper: Upload file to Firebase
-const uploadToFirebase = (file) => {
-  return new Promise((resolve, reject) => {
-    if (!file) return resolve(null);
-    if (!bucket) return resolve(`/uploads/${file.filename}`);
-
-    const fileName = `${Date.now()}_${file.originalname}`;
-    const fileUpload = bucket.file(fileName);
-
-    const blobStream = fileUpload.createWriteStream({
-      metadata: {
-        contentType: file.mimetype
-      }
-    });
-
-    blobStream.on('error', (error) => {
-      reject(error);
-    });
-
-    blobStream.on('finish', async () => {
-      // Make the file public (or use signed URLs, but public is easier for display in apps without token mgmt)
-      try {
-        await fileUpload.makePublic();
-        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
-        resolve(publicUrl);
-      } catch (err) {
-        reject(err);
-      }
-    });
-
-    blobStream.end(file.buffer);
-  });
-};
-
+// Built-in static files serve the uploads from the local disk
 // Helper function for keyword matching
 const buildMatchQuery = (table, text) => {
   const keywords = text.split(/\s+/).filter(w => w.length > 2); // Ignore short words
@@ -90,7 +57,7 @@ router.post('/found', auth, upload.single('image'), async (req, res) => {
   try {
     let image_url = null;
     if (req.file) {
-      image_url = await uploadToFirebase(req.file);
+      image_url = await Promise.resolve(`/uploads/${req.file.filename}`);
     }
 
     const [result] = await pool.query(
@@ -153,7 +120,7 @@ router.post('/lost', auth, upload.single('image'), async (req, res) => {
   try {
     let image_url = null;
     if (req.file) {
-      image_url = await uploadToFirebase(req.file);
+      image_url = await Promise.resolve(`/uploads/${req.file.filename}`);
     }
 
     const [result] = await pool.query(

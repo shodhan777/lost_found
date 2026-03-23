@@ -31,7 +31,11 @@ const Login = () => {
             })
             .catch((err) => {
                 console.error('Login error:', err);
-                setError(err.response?.data?.error || 'Invalid email or password.');
+                let errorMsg = err.response?.data?.error || err.response?.data?.message || 'Invalid email or password.';
+                if (typeof errorMsg === 'object') {
+                    errorMsg = errorMsg.message || JSON.stringify(errorMsg);
+                }
+                setError(errorMsg);
             })
             .finally(() => {
                 setLoading(false);
